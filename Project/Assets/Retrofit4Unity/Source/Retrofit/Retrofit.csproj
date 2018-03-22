@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{90B6A3DF-80AB-4207-A2AF-977AF7277927}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Retrofit</RootNamespace>
+    <AssemblyName>Retrofit</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\Libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Retrofit\CallBack.cs" />
+    <Compile Include="Retrofit\Converter\ConversionException.cs" />
+    <Compile Include="Retrofit\Converter\Converter.cs" />
+    <Compile Include="Retrofit\Converter\DefalutConverter.cs" />
+    <Compile Include="Retrofit\HttpImpl\BestHttpImpl.cs" />
+    <Compile Include="Retrofit\HttpImpl\HttpClientImpl.cs" />
+    <Compile Include="Retrofit\HttpImpl\HttpImplement.cs" />
+    <Compile Include="Retrofit\HttpImpl\RxHttpImplement.cs" />
+    <Compile Include="Retrofit\HttpImpl\UnityWebRequestImpl.cs" />
+    <Compile Include="Retrofit\HttpImpl\WWWHttpImpl.cs" />
+    <Compile Include="Retrofit\Methods\DeleteAttribute.cs" />
+    <Compile Include="Retrofit\Methods\GetAttribute.cs" />
+    <Compile Include="Retrofit\Methods\HeadAttribute.cs" />
+    <Compile Include="Retrofit\Methods\HeadersAttribute.cs" />
+    <Compile Include="Retrofit\Methods\Method.cs" />
+    <Compile Include="Retrofit\Methods\MultipartAttribute.cs" />
+    <Compile Include="Retrofit\Methods\PatchAttribute.cs" />
+    <Compile Include="Retrofit\Methods\PostAttribute.cs" />
+    <Compile Include="Retrofit\Methods\PutAttribute.cs" />
+    <Compile Include="Retrofit\Methods\RestMethodAttribute.cs" />
+    <Compile Include="Retrofit\MultipartBody.cs" />
+    <Compile Include="Retrofit\Parameters\BodyAttribute.cs" />
+    <Compile Include="Retrofit\Parameters\FieldAttribute.cs" />
+    <Compile Include="Retrofit\Parameters\HeaderAtribute.cs" />
+    <Compile Include="Retrofit\Parameters\PartAttribute.cs" />
+    <Compile Include="Retrofit\Parameters\PathAttribute.cs" />
+    <Compile Include="Retrofit\Parameters\QueryAttribute.cs" />
+    <Compile Include="Retrofit\Parameters\QueryMapAttribute.cs" />
+    <Compile Include="Retrofit\RequestInterceptor.cs" />
+    <Compile Include="Retrofit\RestAdapter.cs" />
+    <Compile Include="Retrofit\RestMethodInfo.cs" />
+    <Compile Include="Retrofit\RxSupport.cs" />
+    <Compile Include="Retrofit\Utils\CoroutineWithData.cs" />
+    <Compile Include="Retrofit\Utils\StringUtils.cs" />
+    <Compile Include="Retrofit\ValueAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BestHttp\BestHttp.csproj">
+      <Project>{9b50681e-c39c-43ef-875e-754cb713b9be}</Project>
+      <Name>BestHttp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HttpClient\HttpClient.csproj">
+      <Project>{8be0a873-1bff-44f5-9a00-980507fc507f}</Project>
+      <Name>HttpClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UniRx\UniRx.csproj">
+      <Project>{4457d8a1-f212-45e0-896c-74251c335dc0}</Project>
+      <Name>UniRx</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

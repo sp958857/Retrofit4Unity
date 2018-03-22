@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8BE0A873-1BFF-44F5-9A00-980507FC507F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HttpClient</RootNamespace>
+    <AssemblyName>HttpClient</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\Libs\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="HttpClient\Dispatcher\Dispatcher.cs" />
+    <Compile Include="HttpClient\Dispatcher\IDispatcher.cs" />
+    <Compile Include="HttpClient\Enums\ContentReadAction.cs" />
+    <Compile Include="HttpClient\Enums\HttpAction.cs" />
+    <Compile Include="HttpClient\Enums\HttpCompletionOption.cs" />
+    <Compile Include="HttpClient\HttpActions\HttpBase.cs" />
+    <Compile Include="HttpClient\HttpActions\HttpDelete.cs" />
+    <Compile Include="HttpClient\HttpActions\HttpGet.cs" />
+    <Compile Include="HttpClient\HttpActions\HttpPatch.cs" />
+    <Compile Include="HttpClient\HttpActions\HttpPost.cs" />
+    <Compile Include="HttpClient\HttpActions\HttpPut.cs" />
+    <Compile Include="HttpClient\HttpClient.cs" />
+    <Compile Include="HttpClient\HttpClientRequest.cs" />
+    <Compile Include="HttpClient\HttpContent\ByteArrayContent.cs" />
+    <Compile Include="HttpClient\HttpContent\FormUrlEncodedContent.cs" />
+    <Compile Include="HttpClient\HttpContent\IHttpContent.cs" />
+    <Compile Include="HttpClient\HttpContent\MultiPartContent.cs" />
+    <Compile Include="HttpClient\HttpContent\MultipartFormDataContent.cs" />
+    <Compile Include="HttpClient\HttpContent\StreamContent.cs" />
+    <Compile Include="HttpClient\HttpContent\StringContent.cs" />
+    <Compile Include="HttpClient\HttpHandler.cs" />
+    <Compile Include="HttpClient\Messages\HttpResponseMessage.cs" />
+    <Compile Include="HttpClient\Messages\UploadStatusMessage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="HttpClient\Example\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
