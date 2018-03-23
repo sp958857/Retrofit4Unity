@@ -1,7 +1,7 @@
 # Retrofit for Unity 2.0
 [sp958857](https://github.com/sp958857)
 
-[中文](https://github.com/sp958857/Retrofit4Unity/blob/master/doc/Zhs/Retrofit 2.0.md)
+[中文](https://github.com/sp958857/Retrofit4Unity/blob/master/doc/Zhs/Retrofit2.0.md)
 ## Introduction
 Retrofit turns your HTTP API into a interface. Calling a request like calling a method.
 ## What's new in Version 2.0
