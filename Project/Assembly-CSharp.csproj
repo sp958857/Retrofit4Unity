@@ -342,6 +342,9 @@
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/Program Files/Unity-5.0.1f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
+ <Reference Include="Castle.Core">
+ <HintPath>E:/U3D/GitHub/Retrofit4Unity/Project/Assets/Retrofit4Unity/Plugins/Castle.Core.dll</HintPath>
+ </Reference>
  <Reference Include="Newtonsoft.Json">
  <HintPath>E:/U3D/GitHub/Retrofit4Unity/Project/Assets/Retrofit4Unity/Plugins/Newtonsoft.Json.dll</HintPath>
  </Reference>
