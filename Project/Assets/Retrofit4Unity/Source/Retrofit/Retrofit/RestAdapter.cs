@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Castle.DynamicProxy;
 using Retrofit.Converter;
 using Retrofit.HttpImpl;
 using Retrofit.Methods;
@@ -24,14 +25,117 @@ using HeaderAttribute = Retrofit.Parameters.HeaderAttribute;
 
 namespace Retrofit
 {
-    public abstract class RestAdapter : MonoBehaviour
+	public class Builder
+	{
+		private string baseUrl;
+		private HttpImplement httpImpl;
+		private RequestInterceptor requestInterceptor;
+		private Converter.Converter converter;
+		private ErrorHandler errorHandler;
+
+		/** API endpoint URL. */
+		public Builder SetEndpoint(string baseUrl)
+		{
+			if (string.IsNullOrEmpty(baseUrl))
+			{
+				throw new Exception("BaseUrl may not be blank.");
+			}
+			this.baseUrl = baseUrl;
+			return this;
+		}
+
+		/** The HTTP client used for requests. */
+		public Builder SetClient(HttpImplement client)
+		{
+			if (client == null)
+			{
+				throw new Exception("Client may not be null.");
+			}
+			this.httpImpl = client;
+			return this;
+		}
+
+		/** A request interceptor for adding data to every request. */
+		public Builder SetRequestInterceptor(RequestInterceptor requestInterceptor)
+		{
+			if (requestInterceptor == null)
+			{
+				throw new Exception("Request interceptor may not be null.");
+			}
+			this.requestInterceptor = requestInterceptor;
+			return this;
+		}
+
+		/** The converter used for serialization and deserialization of objects. */
+		public Builder SetConverter(Converter.Converter converter)
+		{
+			if (converter == null)
+			{
+				throw new Exception("Converter may not be null.");
+			}
+			this.converter = converter;
+			return this;
+		}
+
+		/**
+	     * The error handler allows you to customize the type of exception thrown for errors on
+	     * synchronous requests.
+	     */
+		public Builder SetErrorHandler(ErrorHandler errorHandler)
+		{
+			if (errorHandler == null)
+			{
+				throw new Exception("Error handler may not be null.");
+			}
+			this.errorHandler = errorHandler;
+			return this;
+		}
+
+
+		/** Create the {@link RestAdapter} instances. */
+		public RestAdapter Build()
+		{
+			if (baseUrl == null)
+			{
+				throw new Exception("BaseUrl may not be null.");
+			}
+			EnsureSaneDefaults();
+			GameObject go = new GameObject(baseUrl);
+			var restAdapter = go.AddComponent<RestAdapter>();
+			restAdapter.Init(baseUrl, httpImpl, requestInterceptor, converter, errorHandler);
+			return restAdapter;
+		}
+
+		private void EnsureSaneDefaults()
+		{
+			if (converter == null)
+			{
+				converter = new DefalutConvert();
+			}
+			if (httpImpl == null)
+			{
+				httpImpl = new HttpClientImpl();
+			}
+			if (errorHandler == null)
+			{
+				errorHandler = new DefaultErrorHandler();
+			}
+			if (requestInterceptor == null)
+			{
+				requestInterceptor = new DefaultRequestInterceptor();
+			}
+		}
+	}
+
+	public abstract class RestAdapter : MonoBehaviour,IInterceptor
     {
         public string baseUrl;
         public Converter.Converter convert;
         public HttpImplement httpImpl;
         public RequestInterceptor interceptor;
+	    public ErrorHandler errorHandler;
 
-        public RxSupport rxSupport;
+		public RxSupport rxSupport;
         public Type iRestInterface;
 
         private Dictionary<string, RestMethodInfo> methodInfoCache = new Dictionary<string, RestMethodInfo>();
@@ -41,19 +145,51 @@ namespace Retrofit
         {
             return false;
         }
-        public void Awake()
-        {
-            methodInfoCache.Clear();
-            convert = new DefalutConvert();
-            httpImpl = SetHttpImpl();
-            interceptor = SetIntercepter();
+		public void Init(string baseUrl, HttpImplement httpImpl, RequestInterceptor requestInterceptor, Converter.Converter converter, ErrorHandler errorHandler)
+		{
+			methodInfoCache.Clear();
+			this.baseUrl = baseUrl;
+            this.httpImpl = httpImpl;
+			this.interceptor = requestInterceptor;
+			this.convert = converter;
+			this.errorHandler = errorHandler;
             rxSupport = new RxSupport(convert, httpImpl, interceptor);
-            SetRestAPI();
-            StartCoroutine(GenMethodCache());
+//            SetRestAPI();todo delete this
         }
 
-   
-
+		public T Create<T>()
+	    {
+		    RetrofitUtils.ValidateServiceClass(typeof(T));
+	        iRestInterface = typeof(T);
+	        StartCoroutine(GenMethodCache());
+	        ProxyGenerator generator = new ProxyGenerator();
+	        var service = (T)generator.CreateInterfaceProxyWithoutTarget(typeof(T), this);
+	        return service;
+	    }
+        public void Intercept(IInvocation invocation)
+        {
+            object[] arguments = invocation.Arguments;
+            var methodInfo = GetRestMethodInfo(invocation.Method);
+            Type t = null;
+            if (methodInfo.IsObservable && (httpImpl is RxHttpImplement))
+            {
+                var url = ParseRestParameters(methodInfo, arguments);
+                var ob = rxSupport.CreateRequestObservable<T>(methodInfo, url, arguments);
+                rxSupport.GetType().GetMethod("CreateRequestObservable")
+                    .MakeGenericMethod(invocation.Method.ReturnType.GetGenericArguments()[0])
+                    .Invoke(rxSupport,new object[]{methodInfo, url, arguments});
+                invocation.ReturnValue = ob;
+            }
+            else
+            {
+                Callback<T> cb = arguments[0] as Callback<T>;
+                object[] args = new List<object>(arguments).GetRange(1, arguments.Length - 1).ToArray();
+                //request
+                var url = ParseRestParameters(methodInfo, args);
+                StartCoroutine(Request(methodInfo, url, args, cb));
+                invocation.ReturnValue = null;
+            }
+        }
         private IEnumerator GenMethodCache()
         {
             RestMethodInfo restMethodInfo = null;
@@ -74,7 +210,7 @@ namespace Retrofit
         protected void SendRequest<T>(Callback<T> cb, params object[] arguments)
         {
             var methodInfo = GetRestMethodInfo();
-            var url = ParseRestParameters<T>(methodInfo, arguments);
+            var url = ParseRestParameters(methodInfo, arguments);
             //request
             StartCoroutine(Request(methodInfo, url, arguments, cb));
         }
@@ -84,7 +220,7 @@ namespace Retrofit
             var methodInfo = GetRestMethodInfo();
             if (methodInfo.IsObservable && (httpImpl is RxHttpImplement))
             {
-                var url = ParseRestParameters<T>(methodInfo, arguments);
+                var url = ParseRestParameters(methodInfo, arguments);
                 var ob = rxSupport.CreateRequestObservable<T>(methodInfo, url, arguments);
                 return ob;
             }
@@ -93,12 +229,30 @@ namespace Retrofit
                 Callback<T> cb = arguments[0] as Callback<T>;
                 object[] args = new List<object>(arguments).GetRange(1, arguments.Length - 1).ToArray();
                 //request
-                var url = ParseRestParameters<T>(methodInfo, args);
+                var url = ParseRestParameters(methodInfo, args);
                 StartCoroutine(Request(methodInfo, url, args, cb));
                 return null;
             }
         }
+        private RestMethodInfo GetRestMethodInfo(MethodBase method)
+        {
+            RestMethodInfo methodInfo = null;
+            if (!genMethodInfoComplete && !methodInfoCache.TryGetValue(method.ToString(), out methodInfo))
+            {
+                //gen cache has not completed and can't be found in cache, just gen and use, but not add to cache;
+                methodInfo = ParseRequestInfoByAttribute(method);
+            }
+            else if (genMethodInfoComplete && !methodInfoCache.TryGetValue(method.ToString(), out methodInfo))
+            {
+                //gen cache has completed and can't be found in cache, something was wrong!
+                Log("RestAdapter Gen Cache Process Error!!!!");
+                methodInfo = ParseRequestInfoByAttribute(method);
+                methodInfoCache.Add(method.ToString(), methodInfo);
+            }
+            return methodInfo;
+        }
 
+        [Obsolete]
         private RestMethodInfo GetRestMethodInfo(int stackIndex = 2)
         {
             StackTrace stackTrace = new StackTrace();
@@ -231,7 +385,7 @@ namespace Retrofit
             }
         }
 
-        private string ParseRestParameters<T>(RestMethodInfo methodInfo, object[] arguments)
+        private string ParseRestParameters(RestMethodInfo methodInfo, object[] arguments)
         {
             string url = baseUrl + methodInfo.Path;
             //if param has QUERY attribute, add the fileds(POST) or URL parameteters(GET)
@@ -489,5 +643,7 @@ namespace Retrofit
                 Debug.Log(log);
             }
         }
+
+      
     }
 }

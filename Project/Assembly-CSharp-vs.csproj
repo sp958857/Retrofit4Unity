@@ -80,6 +80,7 @@
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\Converter\ConversionException.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\Converter\Converter.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\Converter\DefalutConverter.cs" />
+     <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\ErrorHandler.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\HttpImpl\HttpClientImpl.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\HttpImpl\HttpImplement.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\HttpImpl\RxHttpImplement.cs" />
@@ -105,8 +106,10 @@
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RequestInterceptor.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RestAdapter.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RestMethodInfo.cs" />
+     <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RetrofitError.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RxSupport.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\Utils\CoroutineWithData.cs" />
+     <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\Utils\RetrofitUtils.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\Utils\StringUtils.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\ValueAttribute.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\UniRx\UniRx\Scripts\Asynchronous\WebRequestExtensions.cs" />

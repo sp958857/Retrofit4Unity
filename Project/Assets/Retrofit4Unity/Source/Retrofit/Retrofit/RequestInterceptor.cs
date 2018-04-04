@@ -8,4 +8,11 @@ namespace Retrofit
     {
         void Intercept(object request);
     }
+	public class DefaultRequestInterceptor : RequestInterceptor
+	{
+		public void Intercept(object request)
+		{
+			//do nothing
+		}
+	}
 }
