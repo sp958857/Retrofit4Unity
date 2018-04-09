@@ -106,6 +106,7 @@
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RequestInterceptor.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RestAdapter.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RestMethodInfo.cs" />
+     <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RetrofitAdapter.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RetrofitError.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\RxSupport.cs" />
      <Compile Include="Assets\Retrofit4Unity\Source\Retrofit\Retrofit\Utils\CoroutineWithData.cs" />
