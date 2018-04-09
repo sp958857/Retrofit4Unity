@@ -49,6 +49,7 @@
      <Compile Include="Assets\Retrofit4Unity\Demo\Scripts\Bean\HttpBinResponse.cs" />
      <Compile Include="Assets\Retrofit4Unity\Demo\Scripts\Bean\PostBody.cs" />
      <Compile Include="Assets\Retrofit4Unity\Demo\Scripts\Example.cs" />
+     <Compile Include="Assets\Retrofit4Unity\Demo\Scripts\ExampleDP.cs" />
      <Compile Include="Assets\Retrofit4Unity\Demo\Scripts\HttpBinService.cs" />
      <Compile Include="Assets\Retrofit4Unity\Demo\Scripts\IHttpBinInterface.cs" />
      <Compile Include="Assets\Retrofit4Unity\Demo\Scripts\UI\ShowResponseArg.cs" />

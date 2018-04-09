@@ -25,7 +25,7 @@ using HeaderAttribute = Retrofit.Parameters.HeaderAttribute;
 
 namespace Retrofit
 {
-    public abstract class RetrofitAdapter : MonoBehaviour, IInterceptor
+    public class RetrofitAdapter : MonoBehaviour, IInterceptor
     {
         public string baseUrl;
         public Converter.Converter convert;
@@ -110,10 +110,6 @@ namespace Retrofit
             genMethodInfoComplete = true;
             yield return null;
         }
-
-        protected abstract RequestInterceptor SetIntercepter();
-        protected abstract HttpImplement SetHttpImpl();
-        protected abstract void SetRestAPI();
 
         protected void SendRequest<T>(Callback<T> cb, params object[] arguments)
         {
