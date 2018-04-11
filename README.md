@@ -1,15 +1,23 @@
-# Retrofit for Unity 2.0
+# Retrofit for Unity 2.1
 [sp958857](https://github.com/sp958857)
 
-[中文](https://github.com/sp958857/Retrofit4Unity/blob/master/doc/Zhs/Retrofit2.0.md)
+[中文](https://github.com/sp958857/Retrofit4Unity/blob/master/doc/Zhs/Retrofit2.1.md)
+## ChangeLog
+### **2.1**
+- Use Dynamic Proxy to simplify the usage
+- Require to set "Api Compatibility Level" to ".NET 2.0" instead of ".NET 2.0 Subset"
+
+### **2.0**
+- Add `Rx(Reactive Extension)` support to Retrofit4Unity, which help us to request asynchronously. For example send request in sub-thread then handle response and update UI in main-thread.
+
+- use HttpClient as default Request Module.
+
 ## Introduction
 Retrofit turns your HTTP API into a interface. Calling a request like calling a method.
-## What's new in Version 2.0
--**[1] Add `Rx(Reactive Extension)` support to Retrofit4Unity**, which help us to request asynchronously. For example send request in sub-thread then handle response and update UI in main-thread.
+## How To Use
+Three steps to retrofit your HTTP API Usage:
 
--**[2] use HttpClient as default Request Module**. Of Course we can still use BestHttp with Rx.
-
-Ps:[Versiono 1.0 User Manual](https://github.com/sp958857/Retrofit4Unity/blob/master/doc/1.0.md)
+-**[1] Define HTTP API in Interface**: Define a interface to maintain your HTTP API
 ```cs
  public interface IHttpBinInterface
     {
@@ -20,53 +28,16 @@ Ps:[Versiono 1.0 User Manual](https://github.com/sp958857/Retrofit4Unity/blob/ma
             );
      }
 ```
-## How To Use
-Three steps to retrofit your HTTP API Usage:
-
--**[1] Define HTTP API in Interface**: Define a interface to maintain your HTTP API
-
--**[2] Extend RestAdapter and Implement your HTTP API defined interface**: Just call `SendRequest(args...)` in the implemented member of this interface.
+-**[2] Build the service.**
 ```cs
-public class HttpBinService:RestAdapter,IHttpBinInterface
-    {
-        private static HttpBinService _instance;
-
-        public static HttpBinService Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    var go = new GameObject("HttpBinService");
-                    _instance = go.AddComponent<HttpBinService>();
-                }
-                return _instance;
-            }
-        }
-  
-        protected override HttpImplement SetHttpImpl()
-        {
-            var httpImpl = new HttpClientImpl();
-            httpImpl.EnableDebug = true;
-            return httpImpl;
-        }
-
-        protected override void SetRestAPI()
-        {
-            baseUrl = "http://httpbin.org";
-            iRestInterface = typeof (IHttpBinInterface);
-        }
-
-
-        public IObservable<HttpBinResponse> Get(string arg1, string arg2)
-        {
-            return SendRequest<HttpBinResponse>(arg1,arg2) as IObservable<HttpBinResponse>;
-        }
-    }
+   RetrofitAdapter adapter = new RetrofitAdapter.Builder()
+            .SetEndpoint("http://httpbin.org")
+	        .Build();
+	    httpService = adapter.Create<IHttpBinInterface>();
 ```
 -**[3] Call it**: Each Call from the created RestHttpService can make a HTTP request to the remote webserver.
 ```cs
- var ob = HttpBinService.Instance.Get("abc", "123");
+ var ob = httpService.Get("abc", "123");
      ob.SubscribeOn(Scheduler.ThreadPool)//send request in sub thread
           .ObserveOn(Scheduler.MainThread)//receive response in main thread
           .Subscribe(data =>
