@@ -53,7 +53,7 @@ namespace Retrofit
                 }
                 else
                 {
-                    throw new Exception("Retrofit return type must be IObserable<>!");
+                    throw new ArgumentException("Retrofit return type must be IObserable<>!");
                 }
             }
             else
@@ -64,7 +64,7 @@ namespace Retrofit
                 }
                 else
                 {
-                    throw new Exception("Sync Retrofit first parameter type must be Callback<>!");
+                    throw new ArgumentException("Sync Retrofit first parameter type must be Callback<>!");
                 }
             }
         }

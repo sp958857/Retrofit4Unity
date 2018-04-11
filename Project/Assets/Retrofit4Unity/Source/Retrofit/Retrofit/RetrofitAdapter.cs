@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Castle.Core.Internal;
 using Castle.DynamicProxy;
 using Retrofit.Converter;
 using Retrofit.HttpImpl;
@@ -27,18 +28,18 @@ namespace Retrofit
 {
     public class RetrofitAdapter : MonoBehaviour, IInterceptor
     {
-        public string baseUrl;
-        public Converter.Converter convert;
-        public ErrorHandler errorHandler;
+        private string baseUrl;
+        private Converter.Converter convert;
+        private ErrorHandler errorHandler;
         private bool genMethodInfoComplete;
-        public HttpImplement httpImpl;
-        public RequestInterceptor interceptor;
-        public Type iRestInterface;
+        private HttpImplement httpImpl;
+        private RequestInterceptor interceptor;
+        private Type iRestInterface;
 
         private readonly Dictionary<string, RestMethodInfo> methodInfoCache = new Dictionary<string, RestMethodInfo>();
 
-        public RxSupport rxSupport;
-
+        private RxSupport rxSupport;
+        private bool enableDebug;
         public void Intercept(IInvocation invocation)
         {
             var arguments = invocation.Arguments;
@@ -47,10 +48,14 @@ namespace Retrofit
             if (methodInfo.IsObservable && httpImpl is RxHttpImplement)
             {
                 var url = ParseRestParameters(methodInfo, arguments);
-                var ob = rxSupport.GetType().GetMethod("CreateRequestObservable")
-                    .MakeGenericMethod(invocation.Method.ReturnType.GetGenericArguments()[0])
-                    .Invoke(rxSupport, new object[] {methodInfo, url, arguments});
-                invocation.ReturnValue = ob;
+                var crb = typeof(RxSupport).GetMethod("CreateRequestObservable");
+                if (crb != null)
+                {
+                    var ob = crb.MakeGenericMethod(invocation.Method.ReturnType.GetGenericArguments()[0])
+                        .Invoke(rxSupport, new object[] { methodInfo, url, arguments });
+                    invocation.ReturnValue = ob;
+                }
+               
             }
             else
             {
@@ -58,29 +63,27 @@ namespace Retrofit
                 var args = new List<object>(arguments).GetRange(1, arguments.Length - 1).ToArray();
                 //request
                 var url = ParseRestParameters(methodInfo, args);
-                var genericArg = cb.GetType().GetGenericArguments()[0];
-                typeof(RetrofitAdapter).GetMethod("CoroutineRequest")
-                    .MakeGenericMethod(genericArg)
-                    .Invoke(this, new object[] {methodInfo, url, args, cb});
-                invocation.ReturnValue = null;
+                var genericArg = cb.GetType().GetGenericArguments().Single();
+                var cr = typeof(RetrofitAdapter).GetMethod("CoroutineRequest", BindingFlags.Instance|BindingFlags.NonPublic);
+                if (cr != null)
+                {
+                    cr.MakeGenericMethod(genericArg)
+                        .Invoke(this, new object[] { methodInfo, url, args, cb });
+                    invocation.ReturnValue = null;
+                }
             }
         }
 
-        public virtual bool EnableDebug()
-        {
-            return false;
-        }
-
-        public void Init(string baseUrl, HttpImplement httpImpl, RequestInterceptor requestInterceptor, Converter.Converter converter, ErrorHandler errorHandler)
+        public void Init(bool enableLog,string baseUrl, HttpImplement httpImpl, RequestInterceptor requestInterceptor, Converter.Converter converter, ErrorHandler errorHandler)
         {
             methodInfoCache.Clear();
+            this.enableDebug = enableLog;
             this.baseUrl = baseUrl;
             this.httpImpl = httpImpl;
-            interceptor = requestInterceptor;
-            convert = converter;
+            this.interceptor = requestInterceptor;
+            this.convert = converter;
             this.errorHandler = errorHandler;
-            rxSupport = new RxSupport(convert, httpImpl, interceptor);
-            //            SetRestAPI();todo delete this
+            this.rxSupport = new RxSupport(convert, httpImpl, interceptor);
         }
 
         public T Create<T>()
@@ -111,58 +114,8 @@ namespace Retrofit
             yield return null;
         }
 
-        protected void SendRequest<T>(Callback<T> cb, params object[] arguments)
-        {
-            var methodInfo = GetRestMethodInfo();
-            var url = ParseRestParameters(methodInfo, arguments);
-            //request
-            StartCoroutine(Request(methodInfo, url, arguments, cb));
-        }
-
-        protected object SendRequest<T>(params object[] arguments)
-        {
-            var methodInfo = GetRestMethodInfo();
-            if (methodInfo.IsObservable && httpImpl is RxHttpImplement)
-            {
-                var url = ParseRestParameters(methodInfo, arguments);
-                var ob = rxSupport.CreateRequestObservable<T>(methodInfo, url, arguments);
-                return ob;
-            }
-            else
-            {
-                var cb = arguments[0] as Callback<T>;
-                var args = new List<object>(arguments).GetRange(1, arguments.Length - 1).ToArray();
-                //request
-                var url = ParseRestParameters(methodInfo, args);
-                StartCoroutine(Request(methodInfo, url, args, cb));
-                return null;
-            }
-        }
-
         private RestMethodInfo GetRestMethodInfo(MethodBase method)
         {
-            RestMethodInfo methodInfo = null;
-            if (!genMethodInfoComplete && !methodInfoCache.TryGetValue(method.ToString(), out methodInfo))
-            {
-                //gen cache has not completed and can't be found in cache, just gen and use, but not add to cache;
-                methodInfo = ParseRequestInfoByAttribute(method);
-            }
-            else if (genMethodInfoComplete && !methodInfoCache.TryGetValue(method.ToString(), out methodInfo))
-            {
-                //gen cache has completed and can't be found in cache, something was wrong!
-                Log("RestAdapter Gen Cache Process Error!!!!");
-                methodInfo = ParseRequestInfoByAttribute(method);
-                methodInfoCache.Add(method.ToString(), methodInfo);
-            }
-            return methodInfo;
-        }
-
-        [Obsolete]
-        private RestMethodInfo GetRestMethodInfo(int stackIndex = 2)
-        {
-            var stackTrace = new StackTrace();
-            var method = stackTrace.GetFrame(stackIndex).GetMethod();
-
             RestMethodInfo methodInfo = null;
             if (!genMethodInfoComplete && !methodInfoCache.TryGetValue(method.ToString(), out methodInfo))
             {
@@ -229,7 +182,6 @@ namespace Retrofit
         private Dictionary<string, string> BuildHeaderParameterMap(List<string> headerParamNames, List<string> headerParamArgs)
         {
             var ret = new Dictionary<string, string>();
-
             for (var i = 0; i < headerParamNames.Count; i++)
                 ret.Add(headerParamNames[i], headerParamArgs[i]);
             return ret;
@@ -485,7 +437,7 @@ namespace Retrofit
                     else
                     {
                         //rule2:[Part] parameter type can only be FileInfo or string or MultipartBody
-                        throw new Exception("[Part] parameter type can only be FileInfo or string or MultipartBody.");
+                        throw new ArgumentException("[Part] parameter type can only be FileInfo or string or MultipartBody.");
                     }
                 }
             }
@@ -507,18 +459,34 @@ namespace Retrofit
 
         protected void Log(string log)
         {
-            if (EnableDebug())
+            if (enableDebug)
                 Debug.Log(log);
         }
 
         public class Builder
         {
+            private bool enableLog;
+            private string goAlias;
             private string baseUrl;
             private Converter.Converter converter;
             private ErrorHandler errorHandler;
             private HttpImplement httpImpl;
             private RequestInterceptor requestInterceptor;
-
+            public Builder EnableLog(bool enable)
+            {
+                this.enableLog = enable;
+                return this;
+            }
+            /// <summary>
+            /// set the GameObject alias name
+            /// </summary>
+            /// <param name="goAlias"></param>
+            /// <returns></returns>
+            public Builder SetGoAlias(string goAlias)
+            {
+                this.goAlias = goAlias;
+                return this;
+            }
             /// <summary>
             /// set API endpoint URL
             /// </summary>
@@ -527,7 +495,7 @@ namespace Retrofit
             public Builder SetEndpoint(string baseUrl)
             {
                 if (string.IsNullOrEmpty(baseUrl))
-                    throw new Exception("BaseUrl may not be blank.");
+                    throw new ArgumentException("BaseUrl may not be blank.");
                 this.baseUrl = baseUrl;
                 return this;
             }
@@ -540,7 +508,7 @@ namespace Retrofit
             public Builder SetClient(HttpImplement client)
             {
                 if (client == null)
-                    throw new Exception("Client may not be null.");
+                    throw new ArgumentException("Client may not be null.");
                 httpImpl = client;
                 return this;
             }
@@ -553,7 +521,7 @@ namespace Retrofit
             public Builder SetRequestInterceptor(RequestInterceptor requestInterceptor)
             {
                 if (requestInterceptor == null)
-                    throw new Exception("Request interceptor may not be null.");
+                    throw new ArgumentException("Request interceptor may not be null.");
                 this.requestInterceptor = requestInterceptor;
                 return this;
             }
@@ -566,7 +534,7 @@ namespace Retrofit
             public Builder SetConverter(Converter.Converter converter)
             {
                 if (converter == null)
-                    throw new Exception("Converter may not be null.");
+                    throw new ArgumentException("Converter may not be null.");
                 this.converter = converter;
                 return this;
             }
@@ -580,24 +548,24 @@ namespace Retrofit
             public Builder SetErrorHandler(ErrorHandler errorHandler)
             {
                 if (errorHandler == null)
-                    throw new Exception("Error handler may not be null.");
+                    throw new ArgumentException("Error handler may not be null.");
                 this.errorHandler = errorHandler;
                 return this;
             }
 
 
             /// <summary>
-            /// Create the {@link RestAdapter} instances.
+            /// Create the RetrofitAdapter instances.
             /// </summary>
             /// <returns></returns>
             public RetrofitAdapter Build()
             {
                 if (baseUrl == null)
-                    throw new Exception("BaseUrl may not be null.");
+                    throw new ArgumentException("BaseUrl may not be null.");
                 EnsureSaneDefaults();
-                var go = new GameObject(baseUrl);
+                var go = new GameObject(goAlias.IsNullOrEmpty()?baseUrl:goAlias);
                 var restAdapter = go.AddComponent<RetrofitAdapter>();
-                restAdapter.Init(baseUrl, httpImpl, requestInterceptor, converter, errorHandler);
+                restAdapter.Init(enableLog,baseUrl, httpImpl, requestInterceptor, converter, errorHandler);
                 return restAdapter;
             }
 
