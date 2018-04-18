@@ -144,12 +144,12 @@ If you need to integrate Retrofit with other HTTP Plugins, just create a class t
 2. Import Retrofit for Unity.
 3. Import `BestHttpImpl.unitypackage` under the fold names Integrations.
   ![Alt text](https://raw.githubusercontent.com/sp958857/Retrofit4Unity/master/Pic/inspector1.png)
-4. Replace the return value in `SetHttpImpl()` from RestAdapter.
+4. Set new client instance while building the RetrofitAdapter.
 ```cs
- protected override HttpImplement SetHttpImpl()
-        {
-            return new BestHttpImpl();
-        }
+ RetrofitAdapter adapter = new RetrofitAdapter.Builder()
+            .SetEndpoint("http://httpbin.org")
+            .SetClient(new BestHttpImpl());
+	        .Build();
 ```
 
 
@@ -161,10 +161,10 @@ If you need to integrate Retrofit with other HTTP Plugins, just create a class t
 1. Import Retrofit for Unity.
 2. Import `UnityWebRequestImpl.unitypackage` under the fold names Integrations.
   ![Alt text](https://raw.githubusercontent.com/sp958857/Retrofit4Unity/master/Pic/inspector2.png)
-3. Replace the return value in `SetHttpImpl()` from RestAdapter.
+3. Set new client instance while building the RetrofitAdapter.
 ```cs
- protected override HttpImplement SetHttpImpl()
-        {
-            return new UnityWebRequestImpl();
-        }
+  RetrofitAdapter adapter = new RetrofitAdapter.Builder()
+            .SetEndpoint("http://httpbin.org")
+            .SetClient(new UnityWebRequestImpl());
+	        .Build();
 ```
