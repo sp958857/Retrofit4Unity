@@ -194,12 +194,12 @@ Retrofit只是一种代码风格的设计，可以美化代码及方便管理API
 2. 导入Retrofit for Unity.
 3. 导入在Integrations目录下的`BestHttpImpl.unitypackage` .
   ![Alt text](./inspector.png)
-4. 用BestHttpImpl实例作为RestAdapter中的SetHttpImpl()方法的返回值.
+4. 在构建RetrofitAdapter使用新的BestHttpImpl实例.
 ```cs
- protected override HttpImplement SetHttpImpl()
-        {
-            return new BestHttpImpl();
-        }
+RetrofitAdapter adapter = new RetrofitAdapter.Builder()
+            .SetEndpoint("http://httpbin.org")
+            .SetClient(new BestHttpImpl());
+	        .Build();
 ```
 
 
@@ -210,12 +210,12 @@ Retrofit只是一种代码风格的设计，可以美化代码及方便管理API
 1. 导入Retrofit for Unity.
 2. 导入在Integrations目录下的`UnityWebRequestImpl.unitypackage`.
   ![Alt text](./inspector2.png)
-3. 用UnityWebRequestImpl实例作为RestAdapter中的SetHttpImpl()方法的返回值.
+3. 在构建RetrofitAdapter使用新的UnityWebRequestImpl实例.
 ```cs
- protected override HttpImplement SetHttpImpl()
-        {
-            return new UnityWebRequestImpl();
-        }
+ RetrofitAdapter adapter = new RetrofitAdapter.Builder()
+            .SetEndpoint("http://httpbin.org")
+            .SetClient(new UnityWebRequestImpl());
+	        .Build();
 ```
 
 
