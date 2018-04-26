@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.IO;
 using System.Threading;
@@ -7,6 +8,14 @@ using Retrofit;
 using UniRx;
 using UnityEngine.UI;
 
+public class DemoErrorHandler : ErrorHandler
+{
+    public Exception handleError(RetrofitError cause)
+    {
+        Debug.Log("ErrorType:" + cause.Kind+" URL:"+cause.Url);
+        return cause;
+    }
+}
 public class ExampleDP : MonoBehaviour
 {
 
@@ -37,6 +46,7 @@ public class ExampleDP : MonoBehaviour
 	    buttonPathTest.onClick.AddListener(OnPathTest);
         RetrofitAdapter adapter = new RetrofitAdapter.Builder()
             .SetEndpoint("http://httpbin.org")
+            .SetErrorHandler(new DemoErrorHandler())
 	        .Build();
 	    httpService = adapter.Create<IHttpBinInterface>();
 	}

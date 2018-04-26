@@ -6,6 +6,7 @@
 #endregion
 
 using System;
+using System.IO;
 using System.Threading;
 using Retrofit.HttpImpl;
 using UniRx;
@@ -18,12 +19,14 @@ namespace Retrofit
         private Converter.Converter convert;
         private RxHttpImplement rxHttpImpl;
         private RequestInterceptor interceptor;
+        private ErrorHandler errorHandler;
 
-        public RxSupport(Converter.Converter convert, HttpImplement httpImpl, RequestInterceptor interceptor)
+        public RxSupport(Converter.Converter convert, HttpImplement httpImpl, RequestInterceptor interceptor,ErrorHandler errorHandler = null)
         {
             this.convert = convert;
             this.rxHttpImpl = httpImpl as RxHttpImplement;
             this.interceptor = interceptor;
+            this.errorHandler = errorHandler;
         }
 
         public static bool IsObservable(Type rawType)
@@ -34,12 +37,12 @@ namespace Retrofit
         {
             var ob = Observable.Create<T>(o =>
             {
-                object request = rxHttpImpl.RxBuildRequest(o, convert, methodInfo, url);
+                object request = rxHttpImpl.RxBuildRequest(o, convert, methodInfo, url, errorHandler);
                 if (interceptor != null)
                 {
                     interceptor.Intercept(request);
                 }
-                rxHttpImpl.RxSendRequest(o, convert, request);
+                rxHttpImpl.RxSendRequest(o, convert, methodInfo, url, errorHandler, request);
                 return Disposable.Create((() => rxHttpImpl.Cancel(request)));
             });
             return ob;

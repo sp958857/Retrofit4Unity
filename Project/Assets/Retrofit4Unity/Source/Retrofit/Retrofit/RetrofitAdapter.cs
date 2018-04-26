@@ -83,7 +83,7 @@ namespace Retrofit
             this.interceptor = requestInterceptor;
             this.convert = converter;
             this.errorHandler = errorHandler;
-            this.rxSupport = new RxSupport(convert, httpImpl, interceptor);
+            this.rxSupport = new RxSupport(convert, httpImpl, interceptor,errorHandler);
         }
 
         public T Create<T>()

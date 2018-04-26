@@ -26,7 +26,7 @@ namespace Retrofit.HttpImpl
             throw new System.NotImplementedException();
         }
 
-        public void RxSendRequest<T>(IObserver<T> o, Converter.Converter convert, object request)
+        public void RxSendRequest<T>(IObserver<T> o, Converter.Converter convert, RestMethodInfo methodInfo, string url, ErrorHandler errorHandler, object request)
         {
             HttpClientRequest httpClientRequest = request as HttpClientRequest;
             if (httpClientRequest != null)
@@ -39,19 +39,27 @@ namespace Retrofit.HttpImpl
             }
         }
 
-        public object RxBuildRequest<T>(IObserver<T> o, Converter.Converter convert, RestMethodInfo methodInfo, string url)
+        private Exception HandleError(ErrorHandler errorHandler,RetrofitError retrofitError)
+        {
+            if (errorHandler != null)
+            {
+               return errorHandler.handleError(retrofitError);
+            }
+            return retrofitError;
+        }
+        public object RxBuildRequest<T>(IObserver<T> o, Converter.Converter convert, RestMethodInfo methodInfo, string url, ErrorHandler errorHandler)
         {
             Action<HttpResponseMessage<string>> responseMessage = message =>
             {
                 string errorMessage = "";
                 if (IsRequestError(message, out errorMessage))
                 {
-                    o.OnError(new Exception(errorMessage));
+                    o.OnError(HandleError(errorHandler,RetrofitError.HttpError(url,errorMessage,convert,typeof(T))));
                     return;
                 }
                 string result = GetSuccessResponse(message);
-                //                        result = "[]";
-                //                        result = "[asd..s]";
+//                                        result = "[]";
+//                                        result = "[asd..s]";
                 if (EnableDebug)
                 {
                     Debug.LogFormat("Raw Response:{0}", result);
@@ -73,7 +81,7 @@ namespace Retrofit.HttpImpl
                 catch (ConversionException e)
                 {
                     formatError = true;
-                    o.OnError(new Exception(e.Message));
+                    o.OnError(HandleError(errorHandler, RetrofitError.ConversionError(url, e.Message, convert, typeof(T),e)));
                 }
                 if (!formatError)
                 {

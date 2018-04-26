@@ -6,36 +6,60 @@ namespace Retrofit
 {
 	public class RetrofitError : Exception
 	{
-		private Converter.Converter converter;
-		private Kind kind;
-		private string response;
-		private Type successType;
-		private string url;
+		private Converter.Converter _converter;
+		private Kind _kind;
+		private string _response;
+	    private Type _successType;
+	    private string _url;
 
-		public RetrofitError(string message, string url, string response, Converter.Converter converter,
+	    public Kind Kind
+        {
+            get
+            {
+                return _kind;
+            }
+        }
+
+        public string Response
+        {
+            get
+            {
+                return _response;
+            }
+        }
+
+        public string Url
+        {
+            get
+            {
+                return _url;
+            }
+        }
+
+        public RetrofitError(string message, string url, string response, Converter.Converter converter,
 			Type successType, Kind kind, Exception exception) : base(message, exception)
 		{
-			this.url = url;
-			this.response = response;
-			this.converter = converter;
-			this.successType = successType;
-			this.kind = kind;
+			this._url = url;
+			this._response = response;
+			this._converter = converter;
+			this._successType = successType;
+			this._kind = kind;
 		}
 
-		public static RetrofitError networkError(string url, IOException exception)
+		public static RetrofitError NetworkError(string url, IOException exception)
 		{
 			return new RetrofitError(exception.Message, url, "", null, null, Kind.NETWORK,
 				exception);
 		}
 
-		public static RetrofitError conversionError(string url, string response, Converter.Converter converter,
+		public static RetrofitError ConversionError(string url, string response, Converter.Converter converter,
 			Type successType, ConversionException exception)
 		{
 			return new RetrofitError(exception.Message, url, response, converter, successType,
 				Kind.CONVERSION, exception);
 		}
 
-		public static RetrofitError httpError(string url, string response, Converter.Converter converter,
+		public static RetrofitError HttpError(string url, string response, Converter.Converter converter,
 			Type successType)
 		{
 			var message = response;
@@ -43,7 +67,7 @@ namespace Retrofit
 			return new RetrofitError(message, url, response, converter, successType, Kind.HTTP, null);
 		}
 
-		public static RetrofitError unexpectedError(string url, Exception exception)
+		public static RetrofitError UnexpectedError(string url, Exception exception)
 		{
 			return new RetrofitError(exception.Message, url, "", null, null, Kind.UNEXPECTED,
 				exception);
