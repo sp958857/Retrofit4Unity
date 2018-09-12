@@ -39,7 +39,7 @@ Retrofit for Unity把Http API描述变成接口直接使用。下面是一个RES
                   Debug.Log("Retrofit Error:" + error);
               });
 ```
-> 在Java版本的Retrofit中借助RxJava来实现异步的请求。好在Unity版本中也有Reactive Extension的扩展 [`UniRx`](https://github.com/neuecc/UniRx)，借助UniRx,可以快速实现Retrofit for Unity的异步请求。
+> 支持相应式编程，在Unity版本中也有Reactive Extension的扩展 [`UniRx`](https://github.com/neuecc/UniRx)，借助UniRx,可以快速实现Retrofit for Unity的异步请求。
 
 ## API 声明
 在接口的方法中使用C# 特性来标识一个请求将被怎么发送，特性可以被标识在方法和方法参数上。
