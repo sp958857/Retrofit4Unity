@@ -5,6 +5,12 @@ using UniRx;
 
 namespace Demo.Scripts
 {
+    
+    [Headers(new string[]
+    {
+        "Accept: application/json",
+        "User-Agent: Retrofit-Sample-App"
+    })]
     public interface IHttpBinInterface
     {
         [Get("/get")]
