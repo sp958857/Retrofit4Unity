@@ -8,8 +8,7 @@ namespace Demo.Scripts
     
     [Headers(new string[]
     {
-        "Accept: application/json",
-        "User-Agent: Retrofit-Sample-App"
+        "Demo: Retrofit-Sample-App"
     })]
     public interface IHttpBinInterface
     {

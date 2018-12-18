@@ -14,6 +14,7 @@ namespace Retrofit.HttpImpl
     public class HttpClientImpl : RxHttpImplement
     {
         public bool EnableDebug = false;
+
         [Obsolete]
         public object BuildRequest(RestMethodInfo methodInfo, string url)
         {
@@ -39,14 +40,15 @@ namespace Retrofit.HttpImpl
             }
         }
 
-        private Exception HandleError(ErrorHandler errorHandler,RetrofitError retrofitError)
+        private Exception HandleError(ErrorHandler errorHandler, RetrofitError retrofitError)
         {
             if (errorHandler != null)
             {
-               return errorHandler.handleError(retrofitError);
+                return errorHandler.handleError(retrofitError);
             }
             return retrofitError;
         }
+
         public object RxBuildRequest<T>(IObserver<T> o, Converter.Converter convert, RestMethodInfo methodInfo, string url, ErrorHandler errorHandler)
         {
             Action<HttpResponseMessage<string>> responseMessage = message =>
@@ -54,7 +56,7 @@ namespace Retrofit.HttpImpl
                 string errorMessage = "";
                 if (IsRequestError(message, out errorMessage))
                 {
-                    o.OnError(HandleError(errorHandler,RetrofitError.HttpError(url,errorMessage,convert,typeof(T))));
+                    o.OnError(HandleError(errorHandler, RetrofitError.HttpError(url, errorMessage, convert, typeof(T))));
                     return;
                 }
                 string result = GetSuccessResponse(message);
@@ -81,7 +83,7 @@ namespace Retrofit.HttpImpl
                 catch (ConversionException e)
                 {
                     formatError = true;
-                    o.OnError(HandleError(errorHandler, RetrofitError.ConversionError(url, e.Message, convert, typeof(T),e)));
+                    o.OnError(HandleError(errorHandler, RetrofitError.ConversionError(url, e.Message, convert, typeof(T), e)));
                 }
                 if (!formatError)
                 {
@@ -102,19 +104,29 @@ namespace Retrofit.HttpImpl
                 httpClientRequest.Abort();
             }
         }
+
         public string GetSuccessResponse(object message)
         {
             HttpResponseMessage<string> responseMessage = message as HttpResponseMessage<string>;
             return responseMessage.Data;
         }
+
         private static void ConfigureRESTfulApi(RestMethodInfo methodInfo, HttpClientRequest client)
         {
             //add headers
             if (methodInfo.Headers.Count > 0)
             {
+                var headers = client.Request.Headers;
                 foreach (var keyValuePair in methodInfo.Headers)
                 {
-                    client.Request.Headers.Add(keyValuePair.Key, keyValuePair.Value);
+                    try
+                    {
+                        headers.Add(keyValuePair.Key, keyValuePair.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("add header " + keyValuePair.Key + " failed, because " + e.Message);
+                    }
                 }
             }
             if (methodInfo.HeaderParameterMap.Count > 0)
@@ -163,12 +175,12 @@ namespace Retrofit.HttpImpl
                             foreach (var keyValuePair in methodInfo.FieldParameterMap)
                             {
                                 StringContent stringContent = new StringContent(keyValuePair.Value.ToString());
-                                multipartFormDataContent.Add(stringContent,keyValuePair.Key);
+                                multipartFormDataContent.Add(stringContent, keyValuePair.Key);
                             }
                             client.SetHttpContent(multipartFormDataContent);
                         }
                     }
-                    else if(formUrlEncodedContent!=null)
+                    else if (formUrlEncodedContent != null)
                     {
                         client.SetHttpContent(formUrlEncodedContent);
                     }
