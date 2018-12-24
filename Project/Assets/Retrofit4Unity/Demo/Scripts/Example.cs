@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using Demo.Scripts;
 using Retrofit;
-using UniRx;
+using NetRxIntegrate;
 using UnityEngine.UI;
 
 public class Example : MonoBehaviour
@@ -144,7 +144,7 @@ public class Example : MonoBehaviour
     {
         RestResponsePanel();
         var ob = HttpBinService.Instance.Put(123.456f, "abc");
-        ob.SubscribeOn(Scheduler.ThreadPool)
+        ob.SubscribeOn(Scheduler.Default)
             .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {

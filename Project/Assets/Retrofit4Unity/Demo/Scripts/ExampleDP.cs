@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using Demo.Scripts;
 using Retrofit;
-using UniRx;
+using NetRxIntegrate;
 using UnityEngine.UI;
 
 public class DemoErrorHandler : ErrorHandler

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UniRx
+namespace NetRxIntegrate
 {
     internal static class YieldInstructionCache
     {

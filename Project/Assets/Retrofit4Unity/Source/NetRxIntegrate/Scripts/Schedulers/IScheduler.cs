@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Disposables;
 
-namespace UniRx
+namespace NetRxIntegrate
 {
     public interface ISchedulerQueueing
     {

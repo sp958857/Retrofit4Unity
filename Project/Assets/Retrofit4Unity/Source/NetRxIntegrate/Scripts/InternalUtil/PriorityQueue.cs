@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace UniRx.InternalUtil
+namespace NetRxIntegrate.InternalUtil
 {
     internal class PriorityQueue<T> where T : IComparable<T>
     {

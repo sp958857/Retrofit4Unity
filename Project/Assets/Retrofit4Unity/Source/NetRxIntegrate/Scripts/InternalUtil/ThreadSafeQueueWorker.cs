@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UniRx.InternalUtil
+namespace NetRxIntegrate.InternalUtil
 {
     public class ThreadSafeQueueWorker
     {

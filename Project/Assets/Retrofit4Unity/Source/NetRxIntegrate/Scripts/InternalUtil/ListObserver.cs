@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UniRx.InternalUtil
+namespace NetRxIntegrate.InternalUtil
 {
     public class ListObserver<T> : IObserver<T>
     {

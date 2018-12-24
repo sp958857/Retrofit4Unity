@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UniRx
+namespace NetRxIntegrate
 {
     internal static class Stubs<T>
     {

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 
-namespace UniRx.InternalUtil
+namespace NetRxIntegrate.InternalUtil
 {
     /// <summary>
     /// Abstract base class for scheduled work items.

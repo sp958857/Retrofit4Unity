@@ -9,10 +9,10 @@ using System.Reactive;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading;
-using UniRx.InternalUtil;
+using NetRxIntegrate.InternalUtil;
 using UnityEngine;
 
-namespace UniRx
+namespace NetRxIntegrate
 {
 
     public sealed class MainThreadDispatcher : MonoBehaviour
