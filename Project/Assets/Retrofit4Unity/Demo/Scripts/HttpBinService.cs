@@ -1,6 +1,7 @@
-﻿using Retrofit;
+﻿using System;
+using Retrofit;
 using Retrofit.HttpImpl;
-using UniRx;
+
 using UnityEngine;
 
 namespace Demo.Scripts

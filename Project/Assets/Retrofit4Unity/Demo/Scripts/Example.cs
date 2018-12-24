@@ -1,6 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.IO;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Threading;
 using Demo.Scripts;
 using Retrofit;
@@ -44,8 +47,8 @@ public class Example : MonoBehaviour
     {
         RestResponsePanel();
         var ob = HttpBinService.Instance.Get("abc", "123");
-        ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+        ob.SubscribeOn(Scheduler.Default)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -62,8 +65,8 @@ public class Example : MonoBehaviour
     {
         RestResponsePanel();
         var ob = HttpBinService.Instance.Post(123.456f, "abc");
-        ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+        ob.SubscribeOn(Scheduler.Default)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -81,8 +84,8 @@ public class Example : MonoBehaviour
         RestResponsePanel();
         var body = new PostBody("sp958857","China");
         var ob = HttpBinService.Instance.PostBody(body,"Unity-Client");
-        ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+        ob.SubscribeOn(Scheduler.Default)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -106,8 +109,8 @@ public class Example : MonoBehaviour
         }
         MultipartBody multipartBody = new MultipartBody(fileInfo);
         var ob = HttpBinService.Instance.MultipartFileUpload(multipartBody, 123.45f,"abc");
-        ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+        ob.SubscribeOn(Scheduler.Default)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -124,8 +127,8 @@ public class Example : MonoBehaviour
     {
         RestResponsePanel();
         var ob = HttpBinService.Instance.Patch(123.456f);
-        ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+        ob.SubscribeOn(Scheduler.Default)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -142,7 +145,7 @@ public class Example : MonoBehaviour
         RestResponsePanel();
         var ob = HttpBinService.Instance.Put(123.456f, "abc");
         ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -159,8 +162,8 @@ public class Example : MonoBehaviour
     {
         RestResponsePanel();
         var ob = HttpBinService.Instance.Delete();
-        ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+        ob.SubscribeOn(Scheduler.Default)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -177,8 +180,8 @@ public class Example : MonoBehaviour
         RestResponsePanel();
         int s = (int) sldSeconds.value;
         var ob = HttpBinService.Instance.PathTest(s);
-        ob.SubscribeOn(Scheduler.ThreadPool)
-            .ObserveOn(Scheduler.MainThread)
+        ob.SubscribeOn(Scheduler.Default)
+            .ObserveOn(SchedulerUnity.MainThread)
             .Subscribe(data =>
                 {
                     Debug.LogFormat("Received on threadId:{0}", Thread.CurrentThread.ManagedThreadId);

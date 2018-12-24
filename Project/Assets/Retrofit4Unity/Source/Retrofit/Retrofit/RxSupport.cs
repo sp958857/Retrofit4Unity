@@ -7,9 +7,10 @@
 
 using System;
 using System.IO;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading;
 using Retrofit.HttpImpl;
-using UniRx;
 using UnityEngine;
 
 namespace Retrofit

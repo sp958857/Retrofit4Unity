@@ -1,27 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Threading;
 using UnityEngine;
 
 namespace UniRx
 {
-#if UniRxLibrary
+
+
     public static partial class SchedulerUnity
     {
-#else
-    public static partial class Scheduler
-    {
-        public static void SetDefaultForUnity()
-        {
-            Scheduler.DefaultSchedulers.ConstantTimeOperations = Scheduler.Immediate;
-            Scheduler.DefaultSchedulers.TailRecursion = Scheduler.Immediate;
-            Scheduler.DefaultSchedulers.Iteration = Scheduler.CurrentThread;
-            Scheduler.DefaultSchedulers.TimeBasedOperations = MainThread;
-            Scheduler.DefaultSchedulers.AsyncConversions = Scheduler.ThreadPool;
-        }
-#endif
+     
         static IScheduler mainThread;
 
         /// <summary>
@@ -132,7 +124,7 @@ namespace UniRx
 
             public DateTimeOffset Now
             {
-                get { return Scheduler.Now; }
+                get { return DateTimeOffset.UtcNow; }
             }
 
             void Schedule(object state)
@@ -143,35 +135,38 @@ namespace UniRx
                     t.Item2();
                 }
             }
-
-            public IDisposable Schedule(Action action)
+            public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
             {
+                if (action == null)
+                    throw new ArgumentNullException("action");
                 var d = new BooleanDisposable();
-                MainThreadDispatcher.Post(scheduleAction, Tuple.Create(d, action));
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.Post(scheduleAction, Tuple.Create(d, a));
                 return d;
             }
 
-            public IDisposable Schedule(DateTimeOffset dueTime, Action action)
-            {
-                return Schedule(dueTime - Now, action);
-            }
-
-            public IDisposable Schedule(TimeSpan dueTime, Action action)
+            public IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
             {
                 var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(dueTime);
-
-                MainThreadDispatcher.SendStartCoroutine(DelayAction(time, action, d));
+                var time = Utils.Normalize(dueTime);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.SendStartCoroutine(DelayAction(time, a, d));
 
                 return d;
             }
 
-            public IDisposable SchedulePeriodic(TimeSpan period, Action action)
+            public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
+            {
+                return Schedule(state,dueTime - Now, action);
+
+            }
+
+            public IDisposable SchedulePeriodic<TState>(TState state, TimeSpan period, Func<TState, TState> action)
             {
                 var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(period);
-
-                MainThreadDispatcher.SendStartCoroutine(PeriodicAction(time, action, d));
+                var time = Utils.Normalize(period);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.SendStartCoroutine(PeriodicAction(time, a, d));
 
                 return d;
             }
@@ -190,6 +185,7 @@ namespace UniRx
                 MainThreadDispatcher.Post(QueuedAction<T>.Instance, Tuple.Create(cancel, state, action));
             }
 
+            
             static class QueuedAction<T>
             {
                 public static readonly Action<object> Instance = new Action<object>(Invoke);
@@ -205,7 +201,7 @@ namespace UniRx
                 }
             }
         }
-
+     
         class IgnoreTimeScaleMainThreadScheduler : IScheduler, ISchedulerPeriodic, ISchedulerQueueing
         {
             readonly Action<object> scheduleAction;
@@ -278,9 +274,9 @@ namespace UniRx
 
             public DateTimeOffset Now
             {
-                get { return Scheduler.Now; }
+                get { return DateTimeOffset.UtcNow; }
             }
-
+           
             void Schedule(object state)
             {
                 var t = (Tuple<BooleanDisposable, Action>)state;
@@ -289,35 +285,37 @@ namespace UniRx
                     t.Item2();
                 }
             }
-
-            public IDisposable Schedule(Action action)
+            public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
             {
+                if (action == null)
+                    throw new ArgumentNullException("action");
                 var d = new BooleanDisposable();
-                MainThreadDispatcher.Post(scheduleAction, Tuple.Create(d, action));
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.Post(scheduleAction, Tuple.Create(d, a));
                 return d;
             }
 
-            public IDisposable Schedule(DateTimeOffset dueTime, Action action)
-            {
-                return Schedule(dueTime - Now, action);
-            }
-
-            public IDisposable Schedule(TimeSpan dueTime, Action action)
+            public IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
             {
                 var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(dueTime);
-
-                MainThreadDispatcher.SendStartCoroutine(DelayAction(time, action, d));
+                var time = Utils.Normalize(dueTime);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.SendStartCoroutine(DelayAction(time, a, d));
 
                 return d;
             }
 
-            public IDisposable SchedulePeriodic(TimeSpan period, Action action)
+            public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
+            {
+                return Schedule(state,dueTime - Now, action);
+            }
+
+            public IDisposable SchedulePeriodic<TState>(TState state, TimeSpan period, Func<TState, TState> action)
             {
                 var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(period);
-
-                MainThreadDispatcher.SendStartCoroutine(PeriodicAction(time, action, d));
+                var time = Utils.Normalize(period);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.SendStartCoroutine(PeriodicAction(time, a, d));
 
                 return d;
             }
@@ -326,6 +324,8 @@ namespace UniRx
             {
                 MainThreadDispatcher.Post(QueuedAction<T>.Instance, Tuple.Create(cancel, state, action));
             }
+
+           
 
             static class QueuedAction<T>
             {
@@ -421,35 +421,36 @@ namespace UniRx
 
             public DateTimeOffset Now
             {
-                get { return Scheduler.Now; }
+                get { return DateTimeOffset.UtcNow; }
             }
-
-            public IDisposable Schedule(Action action)
+            public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
             {
-                return Schedule(TimeSpan.Zero, action);
+                return Schedule(state,TimeSpan.Zero, action);
+
             }
 
-            public IDisposable Schedule(DateTimeOffset dueTime, Action action)
-            {
-                return Schedule(dueTime - Now, action);
-            }
-
-            public IDisposable Schedule(TimeSpan dueTime, Action action)
+            public IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
             {
                 var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(dueTime);
-
-                MainThreadDispatcher.StartFixedUpdateMicroCoroutine(DelayAction(time, action, d));
+                var time = Utils.Normalize(dueTime);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.StartFixedUpdateMicroCoroutine(DelayAction(time, a, d));
 
                 return d;
             }
 
-            public IDisposable SchedulePeriodic(TimeSpan period, Action action)
+            public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
+            {
+                return Schedule(state,dueTime - Now, action);
+
+            }
+
+            public IDisposable SchedulePeriodic<TState>(TState state, TimeSpan period, Func<TState, TState> action)
             {
                 var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(period);
-
-                MainThreadDispatcher.StartFixedUpdateMicroCoroutine(PeriodicAction(time, action, d));
+                var time = Utils.Normalize(period);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.StartFixedUpdateMicroCoroutine(PeriodicAction(time, a, d));
 
                 return d;
             }
@@ -458,6 +459,8 @@ namespace UniRx
             {
                 MainThreadDispatcher.StartFixedUpdateMicroCoroutine(ImmediateAction(state, action, cancel));
             }
+
+           
         }
 
         class EndOfFrameMainThreadScheduler : IScheduler, ISchedulerPeriodic, ISchedulerQueueing
@@ -535,45 +538,46 @@ namespace UniRx
                 }
             }
 
+            public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
+            {
+                return Schedule(state,TimeSpan.Zero, action);
+            }
+
+            public IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+            {
+                var d = new BooleanDisposable();
+                var time = Utils.Normalize(dueTime);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.StartEndOfFrameMicroCoroutine(DelayAction(time, a, d));
+
+                return d;
+            }
+
+            public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
+            {
+                return Schedule(state,dueTime - Now, action);
+
+            }
+            public IDisposable SchedulePeriodic<TState>(TState state, TimeSpan period, Func<TState, TState> action)
+            {
+                var d = new BooleanDisposable();
+                var time = Utils.Normalize(period);
+                Action a = Utils.IgnoreResult(action, (IScheduler)this, state);
+                MainThreadDispatcher.StartEndOfFrameMicroCoroutine(PeriodicAction(time, a, d));
+
+                return d;
+            }
             public DateTimeOffset Now
             {
-                get { return Scheduler.Now; }
-            }
-
-            public IDisposable Schedule(Action action)
-            {
-                return Schedule(TimeSpan.Zero, action);
-            }
-
-            public IDisposable Schedule(DateTimeOffset dueTime, Action action)
-            {
-                return Schedule(dueTime - Now, action);
-            }
-
-            public IDisposable Schedule(TimeSpan dueTime, Action action)
-            {
-                var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(dueTime);
-
-                MainThreadDispatcher.StartEndOfFrameMicroCoroutine(DelayAction(time, action, d));
-
-                return d;
-            }
-
-            public IDisposable SchedulePeriodic(TimeSpan period, Action action)
-            {
-                var d = new BooleanDisposable();
-                var time = Scheduler.Normalize(period);
-
-                MainThreadDispatcher.StartEndOfFrameMicroCoroutine(PeriodicAction(time, action, d));
-
-                return d;
+                get { return DateTimeOffset.UtcNow; }
             }
 
             public void ScheduleQueueing<T>(ICancelable cancel, T state, Action<T> action)
             {
                 MainThreadDispatcher.StartEndOfFrameMicroCoroutine(ImmediateAction(state, action, cancel));
             }
+
+        
         }
     }
 }

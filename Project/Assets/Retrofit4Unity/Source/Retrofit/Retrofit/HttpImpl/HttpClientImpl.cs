@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using CI.HttpClient;
 using Retrofit.Converter;
-using UniRx;
+
 using UnityEngine;
 
 namespace Retrofit.HttpImpl
