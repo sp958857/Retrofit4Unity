@@ -6,12 +6,8 @@
 #endregion
 
 using System;
-using System.IO;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Threading;
 using Retrofit.HttpImpl;
-using UnityEngine;
+using UniRx;
 
 namespace Retrofit
 {

@@ -4,6 +4,7 @@
 #endregion
 
 using System;
+using UniRx;
 
 namespace Retrofit.HttpImpl
 {

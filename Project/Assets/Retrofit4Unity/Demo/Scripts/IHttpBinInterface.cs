@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Reactive;
 using Retrofit;
 using Retrofit.Methods;
 using Retrofit.Parameters;
+using UniRx;
 
 
 namespace Demo.Scripts
